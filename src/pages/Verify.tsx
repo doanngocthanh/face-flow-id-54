@@ -60,7 +60,10 @@ const Verify = () => {
       // First check image quality
       const base64Image = faceImage.replace(/^data:image\/[a-z]+;base64,/, '');
       
-      const qualityResponse = await fetch('http://vue.io.vn/api/auth/verify-quality', {
+      console.log('Checking image quality...');
+      console.log('API URL:', 'https://vue.io.vn/api/auth/verify-quality');
+      
+      const qualityResponse = await fetch('https://vue.io.vn/api/auth/verify-quality', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -70,12 +73,19 @@ const Verify = () => {
         }),
       });
 
-      if (!qualityResponse.ok) {
-        throw new Error('Ảnh không đạt chất lượng yêu cầu');
+      console.log('Quality check response status:', qualityResponse.status);
+      const qualityResult = await qualityResponse.json();
+      console.log('Quality check result:', qualityResult);
+
+      if (!qualityResponse.ok || !qualityResult.success) {
+        throw new Error(qualityResult.message || 'Ảnh không đạt chất lượng yêu cầu');
       }
 
       // Then authenticate
-      const authResponse = await fetch('http://vue.io.vn/api/auth/authenticate', {
+      console.log('Authenticating...');
+      console.log('API URL:', 'https://vue.io.vn/api/auth/authenticate');
+      
+      const authResponse = await fetch('https://vue.io.vn/api/auth/authenticate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -85,7 +95,9 @@ const Verify = () => {
         }),
       });
 
+      console.log('Auth response status:', authResponse.status);
       const result = await authResponse.json();
+      console.log('Auth result:', result);
 
       if (authResponse.ok && result.success) {
         setVerificationResult({

@@ -199,19 +199,32 @@ const CameraCapture = () => {
     try {
       const base64Image = imageData.replace(/^data:image\/[a-z]+;base64,/, '');
       
-      const response = await fetch('http://vue.io.vn/api/register/', {
+      console.log('Registering user:', userName);
+      console.log('API URL:', 'https://vue.io.vn/api/register/');
+      
+      const requestBody = {
+        name: userName,
+        image: base64Image,
+        user_id: generateUUID()
+      };
+      
+      console.log('Request body keys:', Object.keys(requestBody));
+      
+      const response = await fetch('https://vue.io.vn/api/register/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          name: userName,
-          face_encoding: base64Image,
-          user_id: generateUUID()
-        }),
+        body: JSON.stringify(requestBody),
       });
 
-      if (response.ok) {
+      console.log('Response status:', response.status);
+      console.log('Response ok:', response.ok);
+      
+      const responseData = await response.json();
+      console.log('Response data:', responseData);
+
+      if (response.ok && responseData.success) {
         // Success animation
         gsap.to(statusRef.current, {
           scale: 1.2,
@@ -231,13 +244,23 @@ const CameraCapture = () => {
         }, 2000);
         
       } else {
-        throw new Error('Registration failed');
+        throw new Error(responseData.message || 'Registration failed');
       }
     } catch (error) {
       console.error('Registration error:', error);
+      
+      let errorMessage = "Không thể đăng ký. Vui lòng thử lại.";
+      if (error instanceof Error) {
+        if (error.message.includes('NetworkError') || error.message.includes('fetch')) {
+          errorMessage = "Lỗi kết nối mạng. Vui lòng kiểm tra internet và thử lại.";
+        } else if (error.message) {
+          errorMessage = error.message;
+        }
+      }
+      
       toast({
         title: "Đăng ký thất bại",
-        description: "Không thể đăng ký. Vui lòng thử lại.",
+        description: errorMessage,
         variant: "destructive",
       });
       
