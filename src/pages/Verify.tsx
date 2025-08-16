@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { CameraUpload } from "@/components/ui/camera-upload";
 import { useToast } from "@/hooks/use-toast";
 import { Shield, Loader2, CheckCircle, XCircle, ArrowLeft } from "lucide-react";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 const Verify = () => {
   const navigate = useNavigate();
@@ -16,8 +17,15 @@ const Verify = () => {
     success: boolean;
     confidence?: number;
     user?: any;
+    authenticated?: boolean;
+    user_id?: string;
+    user_name?: string;
+    face_detection?: {
+      bbox?: { x?: number; y?: number; width?: number; height?: number };
+      detection_confidence?: number;
+    };
   } | null>(null);
-  
+
   const cardRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const formRef = useRef<HTMLDivElement>(null);
@@ -26,21 +34,21 @@ const Verify = () => {
   useEffect(() => {
     // GSAP entrance animations
     const tl = gsap.timeline();
-    
-    tl.fromTo(cardRef.current, 
+
+    tl.fromTo(cardRef.current,
       { opacity: 0, scale: 0.9, y: 30 },
       { opacity: 1, scale: 1, y: 0, duration: 0.6, ease: "back.out(1.7)" }
     )
-    .fromTo(titleRef.current,
-      { opacity: 0, y: -20 },
-      { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" },
-      "-=0.3"
-    )
-    .fromTo(formRef.current,
-      { opacity: 0, y: 20 },
-      { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" },
-      "-=0.2"
-    );
+      .fromTo(titleRef.current,
+        { opacity: 0, y: -20 },
+        { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" },
+        "-=0.3"
+      )
+      .fromTo(formRef.current,
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" },
+        "-=0.2"
+      );
   }, []);
 
   const handleVerify = async () => {
@@ -59,11 +67,11 @@ const Verify = () => {
     try {
       // First check image quality
       const base64Image = faceImage.replace(/^data:image\/[a-z]+;base64,/, '');
-      
+
       console.log('Checking image quality...');
-      console.log('API URL:', 'https://vue.io.vn/api/auth/verify-quality');
-      
-      const qualityResponse = await fetch('https://vue.io.vn/api/auth/verify-quality', {
+      console.log('API URL:', '/api/auth/verify-quality');
+
+      const qualityResponse = await fetch('/api/auth/verify-quality', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -83,9 +91,9 @@ const Verify = () => {
 
       // Then authenticate
       console.log('Authenticating...');
-      console.log('API URL:', 'https://vue.io.vn/api/auth/authenticate');
-      
-      const authResponse = await fetch('https://vue.io.vn/api/auth/authenticate', {
+      console.log('API URL:', '/api/auth/authenticate');
+
+      const authResponse = await fetch('/api/auth/authenticate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -105,6 +113,11 @@ const Verify = () => {
           confidence: result.confidence,
           user: result.user
         });
+        // Lưu trạng thái xác thực và user_id vào localStorage
+        localStorage.setItem('face_authenticated', 'true');
+        if (result.user?.user_id) {
+          localStorage.setItem('face_user_id', result.user.user_id);
+        }
 
         // Success animation - only run if element exists
         if (cardRef.current) {
@@ -161,7 +174,7 @@ const Verify = () => {
       }
     } catch (error) {
       console.error('Verification error:', error);
-      
+
       setVerificationResult({
         success: false
       });
@@ -188,7 +201,7 @@ const Verify = () => {
   const resetVerification = () => {
     setFaceImage("");
     setVerificationResult(null);
-    
+
     // Reset animations
     gsap.fromTo(formRef.current,
       { opacity: 0, y: 20 },
@@ -199,30 +212,31 @@ const Verify = () => {
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-background to-background/50">
       <Card ref={cardRef} className="w-full max-w-md gradient-card shadow-card border-border/50">
-        <CardHeader className="text-center space-y-4">
-          <div className="flex items-center justify-between">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate('/')}
-              className="text-muted-foreground hover:text-foreground"
-            >
-              <ArrowLeft className="w-4 h-4 mr-1" />
-              Quay lại
-            </Button>
-            <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
-              <Shield className="w-8 h-8 text-primary" />
+        {!verificationResult?.success && (
+          <CardHeader className="text-center space-y-4">
+            <div className="flex flex-col items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate('/')}
+                className="flex items-center gap-2 text-muted-foreground hover:text-foreground justify-center"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                <span>Quay lại</span>
+              </Button>
+              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
+                <Shield className="w-8 h-8 text-primary" />
+              </div>
             </div>
-            <div className="w-16"></div>
-          </div>
-          <div ref={titleRef}>
-            <CardTitle className="text-2xl font-bold text-foreground">Xác thực khuôn mặt</CardTitle>
-            <CardDescription className="text-muted-foreground">
-              Chụp ảnh để xác thực danh tính
-            </CardDescription>
-          </div>
-        </CardHeader>
-        
+            <div ref={titleRef}>
+              <CardTitle className="text-2xl font-bold text-foreground">Xác thực khuôn mặt</CardTitle>
+              <CardDescription className="text-muted-foreground">
+                Chụp ảnh để xác thực danh tính
+              </CardDescription>
+            </div>
+          </CardHeader>
+        )}
+
         <CardContent className="space-y-6">
           {!verificationResult && (
             <div ref={formRef}>
@@ -256,11 +270,10 @@ const Verify = () => {
 
           {verificationResult && (
             <div ref={resultRef} className="text-center space-y-4">
-              <div className={`mx-auto w-20 h-20 rounded-full flex items-center justify-center ${
-                verificationResult.success 
-                  ? 'bg-success/10 text-success' 
+              <div className={`mx-auto w-20 h-20 rounded-full flex items-center justify-center ${verificationResult.success
+                  ? 'bg-success/10 text-success'
                   : 'bg-destructive/10 text-destructive'
-              }`}>
+                }`}>
                 {verificationResult.success ? (
                   <CheckCircle className="w-10 h-10" />
                 ) : (
@@ -269,21 +282,25 @@ const Verify = () => {
               </div>
 
               <div className="space-y-2">
-                <h3 className={`text-xl font-semibold ${
-                  verificationResult.success ? 'text-success' : 'text-destructive'
-                }`}>
-                  {verificationResult.success ? 'Xác thực thành công!' : 'Xác thực thất bại'}
-                </h3>
-                
-                {verificationResult.success && verificationResult.user && (
-                  <div className="space-y-1">
-                    <p className="text-foreground font-medium">
-                      Chào mừng, {verificationResult.user.name}!
-                    </p>
-                    {verificationResult.confidence && (
-                      <p className="text-sm text-muted-foreground">
-                        Độ tin cậy: {(verificationResult.confidence * 100).toFixed(1)}%
-                      </p>
+
+
+                {verificationResult.success && (
+                  <div className="flex flex-col items-center gap-2 mt-2">
+                    <div className="flex flex-col items-center gap-1 mb-2">
+                      <h3 className={`text-xl font-semibold ${verificationResult.success ? 'text-success' : 'text-destructive'
+                        }`}>
+                        {verificationResult.success ? 'Xác thực thành công!' : 'Xác thực thất bại'}
+                      </h3>
+                    </div>
+                    <Avatar className="w-16 h-16 mb-2 border-2 border-primary/40 shadow-sm">
+                      <AvatarImage src={faceImage} alt="Face" />
+                      <AvatarFallback>?</AvatarFallback>
+                    </Avatar>
+                    <div className="font-semibold text-base text-foreground mb-1">
+                      {verificationResult.user_name || 'Người dùng'}
+                    </div>
+                    {verificationResult.confidence !== undefined && (
+                      <div className="text-xs text-muted-foreground mb-1">Độ tin cậy: {(verificationResult.confidence * 100).toFixed(1)}%</div>
                     )}
                   </div>
                 )}
@@ -318,7 +335,7 @@ const Verify = () => {
           <div className="text-center">
             <Button
               variant="ghost"
-              onClick={() => navigate('/')}
+              onClick={() => navigate('/register')}
               className="text-primary hover:text-primary/80 text-sm"
             >
               Chưa có tài khoản? Đăng ký →

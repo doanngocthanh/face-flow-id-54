@@ -58,8 +58,9 @@ const Register = () => {
       return;
     }
 
-    // Navigate to camera capture page with user name
-    navigate('/camera-capture', { state: { userName: name.trim() } });
+  // Sinh userId và truyền sang camera-capture
+  const userId = generateUUID();
+  navigate('/camera-capture', { state: { userName: name.trim(), userId } });
   };
 
   return (
