@@ -64,19 +64,68 @@ const CameraCapture = () => {
       setCameraError(null);
       
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        throw new Error("Camera không được hỗ trợ");
+        throw new Error("Camera không được hỗ trợ trên trình duyệt này");
+      }
+
+      // Check available video devices
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const videoDevices = devices.filter(device => device.kind === 'videoinput');
+      
+      if (videoDevices.length === 0) {
+        throw new Error("Không tìm thấy camera. Vui lòng kiểm tra kết nối camera của bạn.");
+      }
+
+      console.log("Available video devices:", videoDevices.map(d => d.label || 'Unnamed Camera'));
+      
+      // Try different constraints if the first attempt fails
+      const constraints = [
+        // First try: Full HD
+        {
+          video: { 
+            facingMode: "user",
+            width: { ideal: 1920 },
+            height: { ideal: 1080 },
+            frameRate: { ideal: 30 }
+          }
+        },
+        // Second try: HD
+        {
+          video: { 
+            facingMode: "user",
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
+            frameRate: { ideal: 30 }
+          }
+        },
+        // Last try: Any camera
+        { 
+          video: {
+            facingMode: "user"
+          }
+        }
+      ];
+      
+      let stream = null;
+      let lastError = null;
+      
+      for (const constraint of constraints) {
+        try {
+          console.log("Trying camera with constraints:", constraint);
+          stream = await navigator.mediaDevices.getUserMedia(constraint);
+          if (stream) {
+            console.log("Successfully started camera with constraints:", constraint);
+            break;
+          }
+        } catch (e) {
+          lastError = e;
+          console.log("Failed with constraints:", constraint, e);
+          continue;
+        }
       }
       
-      const constraints = {
-        video: { 
-          facingMode: "user",
-          width: { ideal: 1280 },
-          height: { ideal: 720 },
-          frameRate: { ideal: 30 }
-        }
-      };
-      
-      const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      if (!stream) {
+        throw lastError || new Error("Không thể khởi động camera với bất kỳ cấu hình nào");
+      }
       
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
@@ -95,11 +144,13 @@ const CameraCapture = () => {
         if (error.name === "NotAllowedError") {
           errorMessage = "Vui lòng cho phép truy cập camera để tiếp tục";
         } else if (error.name === "NotFoundError") {
-          errorMessage = "Không tìm thấy camera. Vui lòng kết nối camera và thử lại";
+          errorMessage = "Không tìm thấy camera. Vui lòng kiểm tra kết nối và khởi động lại camera của bạn";
         } else if (error.name === "NotSupportedError") {
-          errorMessage = "Trình duyệt không hỗ trợ camera";
+          errorMessage = "Trình duyệt không hỗ trợ camera. Vui lòng thử với Chrome hoặc Edge";
         } else if (error.name === "NotReadableError") {
-          errorMessage = "Camera đang được sử dụng. Vui lòng đóng các ứng dụng khác";
+          errorMessage = "Camera đang được sử dụng bởi ứng dụng khác. Vui lòng đóng các ứng dụng đang sử dụng camera";
+        } else if (error.message) {
+          errorMessage = error.message;
         }
       }
       setCameraError(errorMessage);

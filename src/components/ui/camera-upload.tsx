@@ -28,18 +28,59 @@ export const CameraUpload = React.forwardRef<
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         throw new Error("Camera API not supported in this browser");
       }
+
+      // First check if any video input devices are available
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const videoDevices = devices.filter(device => device.kind === 'videoinput');
       
-      const constraints = {
-        video: { 
-          facingMode: "user",
-          width: { ideal: 640 },
-          height: { ideal: 480 }
+      if (videoDevices.length === 0) {
+        throw new Error("No camera devices found. Please check your camera connection.");
+      }
+
+      console.log("Available video devices:", videoDevices.length);
+      
+      // Try different constraints if the first attempt fails
+      const constraints = [
+        // First try: HD resolution
+        {
+          video: { 
+            facingMode: "user",
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          }
+        },
+        // Second try: Lower resolution
+        {
+          video: { 
+            facingMode: "user",
+            width: { ideal: 640 },
+            height: { ideal: 480 }
+          }
+        },
+        // Last try: Any camera
+        { video: true }
+      ];
+      
+      let stream = null;
+      let error = null;
+      
+      for (const constraint of constraints) {
+        try {
+          console.log("Trying camera with constraints:", constraint);
+          stream = await navigator.mediaDevices.getUserMedia(constraint);
+          if (stream) break;
+        } catch (e) {
+          error = e;
+          console.log("Failed with constraints:", constraint, e);
+          continue;
         }
-      };
+      }
       
-      console.log("Requesting camera permission...");
-      const stream = await navigator.mediaDevices.getUserMedia(constraints);
-      console.log("Camera permission granted, setting up video stream...");
+      if (!stream) {
+        throw error || new Error("Could not start camera with any configuration");
+      }
+
+      console.log("Camera started successfully");
       
       if (videoRef.current) {
         videoRef.current.srcObject = stream;

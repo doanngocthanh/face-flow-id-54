@@ -61,9 +61,9 @@ const Verify = () => {
       const base64Image = faceImage.replace(/^data:image\/[a-z]+;base64,/, '');
       
       console.log('Checking image quality...');
-      console.log('API URL:', 'http://vue.io.vn/api/auth/verify-quality');
+      console.log('API URL:', 'https://vue.io.vn/api/auth/verify-quality');
       
-      const qualityResponse = await fetch('http://vue.io.vn/api/auth/verify-quality', {
+      const qualityResponse = await fetch('https://vue.io.vn/api/auth/verify-quality', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -83,9 +83,9 @@ const Verify = () => {
 
       // Then authenticate
       console.log('Authenticating...');
-      console.log('API URL:', 'http://vue.io.vn/api/auth/authenticate');
+      console.log('API URL:', 'https://vue.io.vn/api/auth/authenticate');
       
-      const authResponse = await fetch('http://vue.io.vn/api/auth/authenticate', {
+      const authResponse = await fetch('https://vue.io.vn/api/auth/authenticate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -99,27 +99,31 @@ const Verify = () => {
       const result = await authResponse.json();
       console.log('Auth result:', result);
 
-      if (authResponse.ok && result.success) {
+      if (result.success) {
         setVerificationResult({
           success: true,
           confidence: result.confidence,
           user: result.user
         });
 
-        // Success animation
-        gsap.to(cardRef.current, {
-          scale: 1.02,
-          duration: 0.3,
-          yoyo: true,
-          repeat: 1,
-          ease: "power2.inOut"
-        });
+        // Success animation - only run if element exists
+        if (cardRef.current) {
+          gsap.to(cardRef.current, {
+            scale: 1.02,
+            duration: 0.3,
+            yoyo: true,
+            repeat: 1,
+            ease: "power2.inOut"
+          });
+        }
 
-        // Animate result appearance
-        gsap.fromTo(resultRef.current,
-          { scale: 0, opacity: 0 },
-          { scale: 1, opacity: 1, duration: 0.5, ease: "back.out(1.7)", delay: 0.2 }
-        );
+        // Animate result appearance - only run if element exists
+        if (resultRef.current) {
+          gsap.fromTo(resultRef.current,
+            { scale: 0, opacity: 0 },
+            { scale: 1, opacity: 1, duration: 0.5, ease: "back.out(1.7)", delay: 0.2 }
+          );
+        }
 
         toast({
           title: "Xác thực thành công!",
@@ -130,20 +134,24 @@ const Verify = () => {
           success: false
         });
 
-        // Error shake animation
-        gsap.to(cardRef.current, {
-          x: -10,
-          duration: 0.1,
-          yoyo: true,
-          repeat: 7,
-          ease: "power2.inOut"
-        });
+        // Error shake animation - only run if element exists
+        if (cardRef.current) {
+          gsap.to(cardRef.current, {
+            x: -10,
+            duration: 0.1,
+            yoyo: true,
+            repeat: 7,
+            ease: "power2.inOut"
+          });
+        }
 
-        // Animate result appearance
-        gsap.fromTo(resultRef.current,
-          { scale: 0, opacity: 0 },
-          { scale: 1, opacity: 1, duration: 0.5, ease: "back.out(1.7)", delay: 0.2 }
-        );
+        // Animate result appearance - only run if element exists
+        if (resultRef.current) {
+          gsap.fromTo(resultRef.current,
+            { scale: 0, opacity: 0 },
+            { scale: 1, opacity: 1, duration: 0.5, ease: "back.out(1.7)", delay: 0.2 }
+          );
+        }
 
         toast({
           title: "Xác thực thất bại",
