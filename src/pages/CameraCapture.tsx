@@ -200,8 +200,27 @@ const CameraCapture = () => {
       const base64Image = imageData.replace(/^data:image\/[a-z]+;base64,/, '');
       
       console.log('Registering user:', userName);
-      console.log('API URL:', 'https://vue.io.vn/api/register/');
+      console.log('API URL:', 'http://vue.io.vn/api/register/');
       
+      // First validate the data
+      const validateResponse = await fetch('http://vue.io.vn/api/register/validate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: userName,
+          image: base64Image
+        }),
+      });
+
+      const validateResult = await validateResponse.json();
+      console.log('Validation result:', validateResult);
+
+      if (!validateResult.valid) {
+        throw new Error(validateResult.errors ? validateResult.errors.join(', ') : 'Dữ liệu không hợp lệ');
+      }
+
       const requestBody = {
         name: userName,
         image: base64Image,
@@ -210,7 +229,7 @@ const CameraCapture = () => {
       
       console.log('Request body keys:', Object.keys(requestBody));
       
-      const response = await fetch('https://vue.io.vn/api/register/', {
+      const response = await fetch('http://vue.io.vn/api/register/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
