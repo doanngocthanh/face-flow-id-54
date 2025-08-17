@@ -8,6 +8,19 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
+    allowedHosts: ["vue.io.vn", "app.vue.io.vn"],
+    proxy: {
+      "/api/v1": {
+        target: "https://vision.vue.io.vn",
+        changeOrigin: true,
+        secure: false,
+      },
+      "/api": {
+        target: "https://vue.io.vn",
+        changeOrigin: true,
+        secure: false,
+      },
+    },
   },
   plugins: [
     react(),

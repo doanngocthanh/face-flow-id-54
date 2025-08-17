@@ -1,12 +1,14 @@
+import AppFooter from "@/components/ui/AppFooter";
+import AppHeader from "@/components/ui/AppHeader";
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CameraUpload } from "@/components/ui/camera-upload";
-import { useToast } from "@/hooks/use-toast";
-import { UploadCloud, FileText, UserPlus } from "lucide-react";
+import { UploadCloud, FileText, UserPlus, LogOut, User } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
 
 const Home = () => {
+  // ...existing code...
   const navigate = useNavigate();
   const { toast } = useToast();
   const isAuthenticated = localStorage.getItem('face_authenticated') === 'true';
@@ -17,27 +19,22 @@ const Home = () => {
     }
   }, [isAuthenticated, navigate]);
   // Danh sách các loại giấy tờ
-  const documents = [
+const documents = [
     {
-      key: 'cmnd',
-      label: 'CMND/CCCD',
-      description: 'Chứng minh nhân dân/Căn cước công dân',
-      icon: <FileText className="w-8 h-8 text-primary" />,
+        key: 'cccd',
+        label: 'Căn cước công dân',
+        description: 'Nhận diện và OCR CCCD (mặt trước, mặt sau)',
+        icon: <FileText className="w-8 h-8 text-primary" />,
     },
     {
-      key: 'passport',
-      label: 'Passport',
-      description: 'Hộ chiếu',
-      icon: <UploadCloud className="w-8 h-8 text-primary" />,
+        key: 'gplx',
+        label: 'Giấy phép lái xe',
+        description: 'Nhận diện và OCR GPLX các loại',
+        icon: <UploadCloud className="w-8 h-8 text-primary" />,
     },
-    {
-      key: 'driver',
-      label: 'Bằng lái xe',
-      description: 'Giấy phép lái xe',
-      icon: <UserPlus className="w-8 h-8 text-primary" />,
-    },
-    // Có thể thêm các loại giấy tờ khác
-  ];
+  
+    // Thêm các loại giấy tờ khác nếu cần
+];
 
   const handleSelectDoc = (docKey: string) => {
     // Chuyển sang trang upload tương ứng, ví dụ /upload/:docKey
@@ -45,14 +42,28 @@ const Home = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-2 sm:p-4 bg-gradient-to-br from-background to-background/50">
-      <Card className="w-full max-w-2xl gradient-card shadow-card border-border/50">
-        <CardHeader className="text-center space-y-4">
-          <CardTitle className="text-2xl font-bold text-foreground">Trang chủ eKYC</CardTitle>
-          <p className="text-muted-foreground">Chọn loại giấy tờ để upload</p>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
+    <div className="min-h-screen bg-gradient-to-br from-background to-background/50 flex flex-col">
+  {/* Header */}
+  <AppHeader />
+      {/* Main content */}
+      <div className="flex-1 flex flex-col items-center justify-center px-2 sm:px-4 py-6">
+        <div className="w-full max-w-3xl">
+          <div className="text-center mb-6">
+            <h1 className="text-3xl font-bold text-foreground mb-2">Chọn loại giấy tờ để upload</h1>
+            <p className="text-muted-foreground">Hệ thống hỗ trợ nhận diện và OCR nhiều loại giấy tờ phổ biến.</p>
+          </div>
+          <div
+            className={
+              `grid gap-4 sm:gap-6 mb-8 ` +
+              (documents.length === 1
+                ? 'grid-cols-1'
+                : documents.length === 2
+                ? 'grid-cols-1 sm:grid-cols-2'
+                : documents.length === 3
+                ? 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3'
+                : 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5')
+            }
+          >
             {documents.map(doc => (
               <div
                 key={doc.key}
@@ -67,27 +78,40 @@ const Home = () => {
             ))}
           </div>
           <div className="flex flex-col items-center w-full pt-2 pb-2">
-            <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 w-full justify-center">
+            {!isAuthenticated ? (
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 w-full justify-center">
+                <Button
+                  variant="outline"
+                  onClick={() => navigate("/register")}
+                  className="w-full sm:flex-1 rounded-lg px-4 py-2"
+                >
+                  <UserPlus className="w-4 h-4 mr-2" />
+                  Đăng ký khuôn mặt
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => navigate("/verify")}
+                  className="w-full sm:flex-1 rounded-lg px-4 py-2"
+                >
+                  <FileText className="w-4 h-4 mr-2" />
+                  Xác thực khuôn mặt
+                </Button>
+              </div>
+            ) : null}
+            <div className="w-full flex justify-center mt-4">
               <Button
-                variant="outline"
-                onClick={() => navigate("/register")}
-                className="w-full sm:flex-1 rounded-lg px-4 py-2"
+                variant="secondary"
+                onClick={() => navigate("/ocr-guide")}
+                className="w-full sm:w-auto rounded-lg px-4 py-2"
               >
-                <UserPlus className="w-4 h-4 mr-2" />
-                Đăng ký khuôn mặt
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => navigate("/verify")}
-                className="w-full sm:flex-1 rounded-lg px-4 py-2"
-              >
-                <FileText className="w-4 h-4 mr-2" />
-                Xác thực khuôn mặt
+                Hướng dẫn nhận diện & OCR các loại thẻ
               </Button>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
+      {/* Footer */}
+    <AppFooter />
     </div>
   );
 };

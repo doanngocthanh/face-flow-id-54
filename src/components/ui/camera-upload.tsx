@@ -7,12 +7,13 @@ interface CameraUploadProps {
   onImageCapture: (imageData: string) => void;
   className?: string;
   disabled?: boolean;
+  facingMode?: "user" | "environment";
 }
 
 export const CameraUpload = React.forwardRef<
   HTMLDivElement,
   CameraUploadProps
->(({ onImageCapture, className, disabled = false, ...props }, ref) => {
+>(({ onImageCapture, className, disabled = false, facingMode = "environment", ...props }, ref) => {
   const [previewImage, setPreviewImage] = React.useState<string | null>(null);
   const [isCapturing, setIsCapturing] = React.useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
@@ -41,18 +42,26 @@ export const CameraUpload = React.forwardRef<
       
       // Try different constraints if the first attempt fails
       const constraints = [
-        // First try: HD resolution
+        // First try: Full HD resolution
         {
           video: { 
-            facingMode: "user",
+            facingMode,
+            width: { ideal: 1920 },
+            height: { ideal: 1080 }
+          }
+        },
+        // Second try: HD resolution
+        {
+          video: { 
+            facingMode,
             width: { ideal: 1280 },
             height: { ideal: 720 }
           }
         },
-        // Second try: Lower resolution
+        // Third try: Lower resolution
         {
           video: { 
-            facingMode: "user",
+            facingMode,
             width: { ideal: 640 },
             height: { ideal: 480 }
           }
@@ -130,21 +139,40 @@ export const CameraUpload = React.forwardRef<
     if (videoRef.current && canvasRef.current) {
       const canvas = canvasRef.current;
       const video = videoRef.current;
-      
+
       if (video.videoWidth === 0 || video.videoHeight === 0) {
         console.error("Video not ready for capture");
         alert("Video chưa sẵn sàng. Vui lòng đợi một chút.");
         return;
       }
-      
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      
+
+      // Crop to match the visible frame (center crop)
+      const displayWidth = video.clientWidth;
+      const displayHeight = video.clientHeight;
+      const videoWidth = video.videoWidth;
+      const videoHeight = video.videoHeight;
+
+      // Calculate cropping area to match display aspect ratio
+      let sx = 0, sy = 0, sw = videoWidth, sh = videoHeight;
+      if (videoWidth / videoHeight > displayWidth / displayHeight) {
+        // Video is wider than display: crop horizontally
+        sw = videoHeight * (displayWidth / displayHeight);
+        sx = (videoWidth - sw) / 2;
+      } else {
+        // Video is taller than display: crop vertically
+        sh = videoWidth * (displayHeight / displayWidth);
+        sy = (videoHeight - sh) / 2;
+      }
+
+      // Crop đúng vùng hiển thị, upscale canvas lên 2x để tăng pixel density
+  const upscale = 3;
+      canvas.width = sw * upscale;
+      canvas.height = sh * upscale;
       const ctx = canvas.getContext('2d');
       if (ctx) {
-        ctx.drawImage(video, 0, 0);
-        const imageData = canvas.toDataURL('image/jpeg', 0.8);
-        console.log("Photo captured successfully");
+  ctx.drawImage(video, sx, sy, sw, sh, 0, 0, sw * upscale, sh * upscale);
+  const imageData = canvas.toDataURL('image/jpeg', 1.0); // JPEG chất lượng cao, pixel density rất cao
+  console.log("Photo captured successfully (cropped & upscaled JPEG x3)");
         setPreviewImage(imageData);
         onImageCapture(imageData);
         stopCamera();

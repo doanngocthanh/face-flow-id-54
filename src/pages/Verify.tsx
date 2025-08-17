@@ -108,10 +108,13 @@ const Verify = () => {
       console.log('Auth result:', result);
 
       if (result.success) {
+        // Lấy tên người dùng ưu tiên theo thứ tự: result.user_name, result.user.user_name, result.user.name
+        const userName = result.user_name || result.user?.user_name || result.user?.name || "Người dùng";
         setVerificationResult({
           success: true,
           confidence: result.confidence,
-          user: result.user
+          user: result.user,
+          user_name: userName
         });
         // Lưu trạng thái xác thực và user_id vào localStorage
         localStorage.setItem('face_authenticated', 'true');
@@ -140,7 +143,7 @@ const Verify = () => {
 
         toast({
           title: "Xác thực thành công!",
-          description: `Chào mừng trở lại, ${result.user?.name || 'người dùng'}!`,
+          description: `Chào mừng trở lại, ${userName}!`,
         });
       } else {
         setVerificationResult({
@@ -209,6 +212,35 @@ const Verify = () => {
     );
   };
 
+  const getCroppedFaceImage = () => {
+    if (!faceImage || !verificationResult?.face_detection?.bbox) {
+      return Promise.resolve(faceImage);
+    }
+    const img = new window.Image();
+    img.src = faceImage;
+    const { x, y, width, height } = verificationResult.face_detection.bbox;
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+    return new Promise<string>((resolve) => {
+      img.onload = () => {
+        ctx?.drawImage(img, x, y, width, height, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/png'));
+      };
+      img.onerror = () => resolve(faceImage);
+    });
+  };
+
+  const [croppedFace, setCroppedFace] = useState<string>("");
+  useEffect(() => {
+    if (verificationResult?.success && faceImage && verificationResult.face_detection?.bbox) {
+      getCroppedFaceImage().then(setCroppedFace);
+    } else {
+      setCroppedFace(faceImage);
+    }
+  }, [verificationResult, faceImage]);
+
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-background to-background/50">
       <Card ref={cardRef} className="w-full max-w-md gradient-card shadow-card border-border/50">
@@ -244,6 +276,7 @@ const Verify = () => {
                 <CameraUpload
                   onImageCapture={setFaceImage}
                   disabled={isLoading}
+                  facingMode="user"
                 />
 
                 <Button
@@ -293,11 +326,11 @@ const Verify = () => {
                       </h3>
                     </div>
                     <Avatar className="w-16 h-16 mb-2 border-2 border-primary/40 shadow-sm">
-                      <AvatarImage src={faceImage} alt="Face" />
+                      <AvatarImage src={croppedFace || faceImage} alt="Face" />
                       <AvatarFallback>?</AvatarFallback>
                     </Avatar>
                     <div className="font-semibold text-base text-foreground mb-1">
-                      {verificationResult.user_name || 'Người dùng'}
+                      {verificationResult.user_name || verificationResult.user?.user_name || verificationResult.user?.name || 'Người dùng'}
                     </div>
                     {verificationResult.confidence !== undefined && (
                       <div className="text-xs text-muted-foreground mb-1">Độ tin cậy: {(verificationResult.confidence * 100).toFixed(1)}%</div>
