@@ -2,12 +2,18 @@ import * as React from "react";
 import { Camera, Upload, X, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { FaceAnalysisOverlay } from "./face-analysis-overlay";
 
 interface CameraUploadProps {
   onImageCapture: (imageData: string) => void;
   className?: string;
   disabled?: boolean;
   facingMode?: "user" | "environment";
+  quality?: {
+    brightness?: number;
+    sharpness?: number;
+    contrast?: number;
+  };
 }
 
 export const CameraUpload = React.forwardRef<

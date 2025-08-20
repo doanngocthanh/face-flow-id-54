@@ -5,29 +5,39 @@ import { cn } from "@/lib/utils"
 interface AIProcessingProps {
   stage?: "analyzing" | "extracting" | "verifying" | "processing"
   className?: string
+  quality?: {
+    brightness?: number;
+    sharpness?: number;
+    contrast?: number;
+  }
+  progress?: number
 }
 
-export function AIProcessing({ stage = "processing", className }: AIProcessingProps) {
+export function AIProcessing({ stage = "processing", className, progress }: AIProcessingProps) {
   const stages = {
     analyzing: {
       icon: Brain,
       text: "Đang phân tích khuôn mặt...",
-      description: "AI đang nhận diện và xác thực khuôn mặt"
+      description: "AI đang nhận diện đặc điểm sinh trắc học",
+      labels: ["Phân tích khuôn mặt", "Kiểm tra chất lượng", "Đánh giá ánh sáng"]
     },
     extracting: {
       icon: Scan,
-      text: "Đang trích xuất thông tin từ ảnh...",
-      description: "Quét và đọc thông tin từ giấy tờ"
+      text: "Đang trích xuất thông tin...",
+      description: "Quét và phân tích dữ liệu sinh trắc học",
+      labels: ["Trích xuất đặc điểm", "Phân tích cấu trúc", "Xác định các điểm chính"]
     },
     verifying: {
       icon: Eye,
-      text: "Đang xác minh độ chính xác...",
-      description: "Kiểm tra tính hợp lệ của thông tin"
+      text: "Đang xác minh dữ liệu...",
+      description: "Kiểm tra và so sánh thông tin",
+      labels: ["Xác thực danh tính", "Kiểm tra chống giả mạo", "Đối chiếu dữ liệu"]
     },
     processing: {
       icon: Loader2,
       text: "Đang xử lý...",
-      description: "Vui lòng chờ trong giây lát"
+      description: "Vui lòng chờ trong giây lát",
+      labels: ["Xử lý dữ liệu", "Chuẩn bị kết quả", "Hoàn tất quy trình"]
     }
   }
 
@@ -74,22 +84,40 @@ export function AIProcessing({ stage = "processing", className }: AIProcessingPr
         </p>
       </div>
 
-      {/* Progress dots */}
-      <div className="flex space-x-2">
-        {[...Array(3)].map((_, i) => (
+      {/* Analysis Labels */}
+      <div className="flex flex-col space-y-2 mt-4">
+        {currentStage.labels.map((label, i) => (
           <div
             key={i}
             className={cn(
-              "w-2 h-2 rounded-full bg-primary/30",
-              "animate-pulse"
+              "flex items-center space-x-2 text-sm",
+              "opacity-60 transition-opacity duration-300",
+              {
+                "opacity-100": true
+              }
             )}
             style={{
-              animationDelay: `${i * 0.2}s`,
-              animationDuration: "1s"
+              animationDelay: `${i * 0.5}s`
             }}
-          />
+          >
+            <div className="w-4 h-4 rounded-full bg-primary/20 animate-pulse"
+                 style={{ animationDelay: `${i * 0.2}s` }} />
+            <span className="text-primary">{label}</span>
+          </div>
         ))}
       </div>
+      
+      {/* Progress Indicator */}
+      {progress !== undefined && (
+        <div className="w-full max-w-xs mt-4">
+          <div className="h-1 bg-primary/20 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-primary transition-all duration-300 animate-pulse"
+              style={{ width: `${progress * 100}%` }}
+            />
+          </div>
+        </div>
+      )}
     </div>
   )
 }
