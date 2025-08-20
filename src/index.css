@@ -8,70 +8,112 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Dark eKYC Theme */
-    --background: 220 13% 7%;
-    --foreground: 220 14% 96%;
+    /* Light Mode - Green eKYC Theme */
+    --background: 0 0% 100%;
+    --foreground: 0 0% 3.9%;
 
-    --card: 220 13% 9%;
-    --card-foreground: 220 14% 96%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 3.9%;
 
-    --popover: 220 13% 9%;
-    --popover-foreground: 220 14% 96%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 3.9%;
 
-    --primary: 158 100% 50%;
-    --primary-foreground: 220 13% 7%;
+    --primary: 140 81% 31%;
+    --primary-variant: 151 55% 42%;
+    --primary-foreground: 0 0% 98%;
 
-    --secondary: 220 13% 15%;
-    --secondary-foreground: 220 14% 96%;
+    --secondary: 0 0% 96.1%;
+    --secondary-foreground: 0 0% 9%;
 
-    --muted: 220 13% 15%;
-    --muted-foreground: 220 9% 46%;
+    --muted: 0 0% 96.1%;
+    --muted-foreground: 0 0% 45.1%;
 
-    --accent: 158 100% 50%;
-    --accent-foreground: 220 13% 7%;
+    --accent: 0 0% 96.1%;
+    --accent-foreground: 0 0% 9%;
 
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 220 14% 96%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
 
-    --success: 142 76% 36%;
-    --success-foreground: 220 14% 96%;
+    --success: 120 100% 25%;
+    --success-foreground: 0 0% 98%;
 
     --warning: 38 92% 50%;
-    --warning-foreground: 220 13% 7%;
+    --warning-foreground: 0 0% 9%;
 
-    --border: 220 13% 20%;
-    --input: 220 13% 15%;
-    --ring: 158 100% 50%;
+    --border: 0 0% 89.8%;
+    --input: 0 0% 89.8%;
+    --ring: 140 81% 31%;
 
     --radius: 0.75rem;
 
-    /* Custom gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(158 100% 50%), hsl(158 100% 40%));
-    --gradient-card: linear-gradient(135deg, hsl(220 13% 11%), hsl(220 13% 9%));
-    --gradient-subtle: linear-gradient(180deg, hsl(220 13% 9%), hsl(220 13% 7%));
+    /* Custom gradients - Green Theme */
+    --gradient-primary: linear-gradient(180deg, #01773D 0%, #00984E 100%);
+    --gradient-card: linear-gradient(135deg, hsl(0 0% 100%), hsl(0 0% 98%));
+    --gradient-subtle: linear-gradient(180deg, hsl(0 0% 98%), hsl(0 0% 96%));
+    --gradient-ai-scan: linear-gradient(90deg, transparent 0%, hsla(140 81% 31% / 0.3) 50%, transparent 100%);
 
     /* Shadows */
-    --shadow-glow: 0 0 30px hsl(158 100% 50% / 0.3);
-    --shadow-card: 0 10px 30px -10px hsl(220 13% 3% / 0.8);
+    --shadow-glow: 0 0 30px hsl(140 81% 31% / 0.2);
+    --shadow-card: 0 4px 20px -2px hsl(0 0% 0% / 0.1);
+    --shadow-elevated: 0 10px 40px -10px hsl(0 0% 0% / 0.15);
 
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* AI Processing Effects */
+    --ai-pulse: 0 0 20px hsl(140 81% 31% / 0.4);
+    --scan-overlay: hsla(140 81% 31% / 0.1);
   }
 
-  /* Keep dark theme as default - removing .dark class since we're dark by default */
+  .dark {
+    /* Dark Mode - Green eKYC Theme */
+    --background: 0 0% 7%;
+    --foreground: 0 0% 90%;
+
+    --card: 0 0% 9%;
+    --card-foreground: 0 0% 90%;
+
+    --popover: 0 0% 9%;
+    --popover-foreground: 0 0% 90%;
+
+    --primary: 140 81% 31%;
+    --primary-variant: 151 55% 42%;
+    --primary-foreground: 0 0% 98%;
+
+    --secondary: 0 0% 14.9%;
+    --secondary-foreground: 0 0% 90%;
+
+    --muted: 0 0% 14.9%;
+    --muted-foreground: 0 0% 63.9%;
+
+    --accent: 0 0% 14.9%;
+    --accent-foreground: 0 0% 90%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+
+    --success: 120 100% 25%;
+    --success-foreground: 0 0% 98%;
+
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 9%;
+
+    --border: 0 0% 14.9%;
+    --input: 0 0% 14.9%;
+    --ring: 140 81% 31%;
+
+    /* Dark mode gradients */
+    --gradient-primary: linear-gradient(180deg, #01773D 0%, #00984E 100%);
+    --gradient-card: linear-gradient(135deg, hsl(0 0% 11%), hsl(0 0% 9%));
+    --gradient-subtle: linear-gradient(180deg, hsl(0 0% 9%), hsl(0 0% 7%));
+    --gradient-ai-scan: linear-gradient(90deg, transparent 0%, hsla(140 81% 31% / 0.4) 50%, transparent 100%);
+
+    /* Dark mode shadows */
+    --shadow-glow: 0 0 30px hsl(140 81% 31% / 0.3);
+    --shadow-card: 0 10px 30px -10px hsl(0 0% 0% / 0.8);
+    --shadow-elevated: 0 20px 50px -15px hsl(0 0% 0% / 0.9);
+
+    /* AI Processing Effects - Enhanced for dark */
+    --ai-pulse: 0 0 25px hsl(140 81% 31% / 0.6);
+    --scan-overlay: hsla(140 81% 31% / 0.15);
+  }
 }
 
 @layer base {
@@ -81,8 +123,10 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground font-inter antialiased;
-    background: linear-gradient(135deg, hsl(var(--background)) 0%, hsl(220 13% 5%) 100%);
+    background: var(--gradient-subtle);
     min-height: 100vh;
+    font-size: 14px;
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
 
   html {
@@ -107,17 +151,84 @@ All colors MUST be HSL.
     box-shadow: var(--shadow-card);
   }
 
+  .shadow-elevated {
+    box-shadow: var(--shadow-elevated);
+  }
+
+  /* Enhanced Animations */
   .animate-fade-in {
     opacity: 0;
-    animation: fadeIn 0.6s ease-out forwards;
+    animation: fadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
   }
 
   .animate-slide-up {
     transform: translateY(20px);
     opacity: 0;
-    animation: slideUp 0.6s ease-out forwards;
+    animation: slideUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
   }
 
+  .animate-slide-in {
+    transform: translateX(-20px);
+    opacity: 0;
+    animation: slideIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+
+  .animate-pulse-glow {
+    animation: pulseGlow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  .animate-ai-scan {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .animate-ai-scan::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: var(--gradient-ai-scan);
+    animation: aiScan 2s linear infinite;
+  }
+
+  .animate-neural-pulse {
+    animation: neuralPulse 1.5s ease-in-out infinite;
+  }
+
+  .animate-radar {
+    animation: radar 2s linear infinite;
+  }
+
+  /* Micro-interactions */
+  .hover-lift {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-elevated);
+  }
+
+  .hover-glow {
+    transition: box-shadow 0.3s ease, border-color 0.3s ease;
+  }
+
+  .hover-glow:hover {
+    box-shadow: var(--ai-pulse);
+    border-color: hsl(var(--primary));
+  }
+
+  .hover-zoom {
+    transition: transform 0.2s ease;
+  }
+
+  .hover-zoom:hover {
+    transform: scale(1.02);
+  }
+
+  /* Keyframes */
   @keyframes fadeIn {
     to {
       opacity: 1;
@@ -128,6 +239,78 @@ All colors MUST be HSL.
     to {
       transform: translateY(0);
       opacity: 1;
+    }
+  }
+
+  @keyframes slideIn {
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes pulseGlow {
+    0%, 100% {
+      box-shadow: 0 0 5px hsl(var(--primary) / 0.3);
+    }
+    50% {
+      box-shadow: var(--ai-pulse);
+    }
+  }
+
+  @keyframes aiScan {
+    0% {
+      left: -100%;
+    }
+    100% {
+      left: 100%;
+    }
+  }
+
+  @keyframes neuralPulse {
+    0%, 100% {
+      opacity: 0.6;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1.05);
+    }
+  }
+
+  @keyframes radar {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* Loading states */
+  .loading-overlay {
+    background: var(--scan-overlay);
+    backdrop-filter: blur(2px);
+  }
+
+  .processing-text {
+    background: linear-gradient(90deg, 
+      hsl(var(--muted-foreground)) 0%, 
+      hsl(var(--primary)) 50%, 
+      hsl(var(--muted-foreground)) 100%);
+    background-size: 200% 100%;
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shimmer 2s ease-in-out infinite;
+  }
+
+  @keyframes shimmer {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
     }
   }
 }
