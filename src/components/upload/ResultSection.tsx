@@ -161,61 +161,101 @@ const ResultSection: React.FC<ResultSectionProps> = ({
                 </div>
                 <div className="font-semibold text-xl text-foreground mb-1">{ocrResult.card_name || ocrResult.card_type}</div>
                 <div className="text-sm text-muted-foreground mb-4">{ocrResult.card_type}</div>
-                {/* Support both array and object result */}
-                {Array.isArray(ocrResult.result?.ocr_results) && ocrResult.result.ocr_results.length > 0 ? (
+                {/* Format mới: lấy từ field_texts và field_regions */}
+                {ocrResult.result?.field_texts ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {(() => {
-                      // ...existing array logic...
-                      const importantKeys = ["id", "name", "full_name", "c_id", "c_full_name", "Số định danh", "Họ tên", "ID", "Name"];
-                      const sortedFields = [...ocrResult.result.ocr_results].sort((a, b) => {
-                        const aKey = (a.class_name || "").toLowerCase();
-                        const bKey = (b.class_name || "").toLowerCase();
-                        const aImportant = importantKeys.some(k => aKey.includes(k.toLowerCase()));
-                        const bImportant = importantKeys.some(k => bKey.includes(k.toLowerCase()));
-                        if (aImportant && !bImportant) return -1;
-                        if (!aImportant && bImportant) return 1;
-                        return 0;
-                      });
-                      return sortedFields.map((field: any, idx: number) => (
-                        <div key={idx} className="rounded-lg border bg-background/80 p-3 shadow-card flex flex-col gap-1">
+                      const fieldTexts = ocrResult.result.field_texts;
+                      const fieldRegions = ocrResult.result.field_regions || {};
+                      const importantFields = ["c_id", "c_full_name", "cdate_of_birth", "c_sex", "c_national"];
+                      const mappedResults = Object.entries(fieldTexts)
+                        .map(([key, value]) => ({
+                          key,
+                          value,
+                          label: typeof getDetectedFieldLabel === 'function' ? getDetectedFieldLabel(key) : key,
+                          region: fieldRegions[key],
+                        }))
+                        .filter((item) => item.value && item.value !== "")
+                        .sort((a, b) => {
+                          const aIndex = importantFields.indexOf(a.key);
+                          const bIndex = importantFields.indexOf(b.key);
+                          if (aIndex === -1 && bIndex === -1) return 0;
+                          if (aIndex === -1) return 1;
+                          if (bIndex === -1) return -1;
+                          return aIndex - bIndex;
+                        });
+                      return mappedResults.length > 0 ? mappedResults.map((item, idx) => (
+                        <div key={item.key} className="rounded-lg border bg-background/80 p-3 shadow-card flex flex-col gap-1">
                           <div className="flex items-center gap-2">
                             <span className="inline-block w-2 h-2 rounded-full bg-primary/60"></span>
-                            <span className="font-medium text-primary">{typeof getDetectedFieldLabel === 'function' ? getDetectedFieldLabel(field.class_name) : field.class_name}</span>
+                            <span className="font-medium text-primary">{item.label}</span>
                           </div>
-                          <div className={"text-base " + (field.text ? "text-foreground" : "italic text-muted-foreground")}>{field.text || "Không có dữ liệu"}</div>
+                          <div className="text-base text-foreground">{typeof item.value === 'string' ? item.value : String(item.value)}</div>
+                          {item.region && item.region.regions && item.region.regions[0] && (
+                            <div className="text-xs text-muted-foreground mt-1">
+                              Độ tin cậy: {item.region.regions[0].confidence?.toFixed(2) || "-"}
+                              {item.region.regions[0].bbox && (
+                                <span> | Vị trí: [{item.region.regions[0].bbox.join(", ")}]</span>
+                              )}
+                            </div>
+                          )}
                         </div>
-                      ));
+                      )) : <div className="italic text-muted-foreground">Không có trường thông tin nào được trích xuất.</div>;
                     })()}
                   </div>
                 ) : (
-                  // If result is an object, render key-value pairs
-                  ocrResult.result && typeof ocrResult.result === 'object' ? (
+                  // Backward compatibility: array/object format cũ
+                  Array.isArray(ocrResult.result?.ocr_results) && ocrResult.result.ocr_results.length > 0 ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       {(() => {
-                        // Filter keys: only show string values
                         const importantKeys = ["id", "name", "full_name", "c_id", "c_full_name", "Số định danh", "Họ tên", "ID", "Name"];
-                        const entries = Object.entries(ocrResult.result).filter(([k, v]) => typeof v === 'string');
-                        // Sort important keys first
-                        const sortedEntries = entries.sort(([k1], [k2]) => {
-                          const aImportant = importantKeys.some(k => k1.toLowerCase().includes(k.toLowerCase()));
-                          const bImportant = importantKeys.some(k => k2.toLowerCase().includes(k.toLowerCase()));
+                        const sortedFields = [...ocrResult.result.ocr_results].sort((a, b) => {
+                          const aKey = (a.class_name || "").toLowerCase();
+                          const bKey = (b.class_name || "").toLowerCase();
+                          const aImportant = importantKeys.some(k => aKey.includes(k.toLowerCase()));
+                          const bImportant = importantKeys.some(k => bKey.includes(k.toLowerCase()));
                           if (aImportant && !bImportant) return -1;
                           if (!aImportant && bImportant) return 1;
                           return 0;
                         });
-                        return sortedEntries.map(([key, value], idx) => (
+                        return sortedFields.map((field: any, idx: number) => (
                           <div key={idx} className="rounded-lg border bg-background/80 p-3 shadow-card flex flex-col gap-1">
                             <div className="flex items-center gap-2">
                               <span className="inline-block w-2 h-2 rounded-full bg-primary/60"></span>
-                              <span className="font-medium text-primary">{typeof getDetectedFieldLabel === 'function' ? getDetectedFieldLabel(key) : key}</span>
+                              <span className="font-medium text-primary">{typeof getDetectedFieldLabel === 'function' ? getDetectedFieldLabel(field.class_name) : field.class_name}</span>
                             </div>
-                            <div className={"text-base " + (value ? "text-foreground" : "italic text-muted-foreground")}>{typeof value === 'string' ? value : "Không có dữ liệu"}</div>
+                            <div className={"text-base " + (field.text ? "text-foreground" : "italic text-muted-foreground")}>{field.text || "Không có dữ liệu"}</div>
                           </div>
                         ));
                       })()}
                     </div>
                   ) : (
-                    <div className="italic text-muted-foreground">Không có trường thông tin nào được trích xuất.</div>
+                    ocrResult.result && typeof ocrResult.result === 'object' ? (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {(() => {
+                          const importantKeys = ["id", "name", "full_name", "c_id", "c_full_name", "Số định danh", "Họ tên", "ID", "Name"];
+                          const entries = Object.entries(ocrResult.result).filter(([k, v]) => typeof v === 'string');
+                          const sortedEntries = entries.sort(([k1], [k2]) => {
+                            const aImportant = importantKeys.some(k => k1.toLowerCase().includes(k.toLowerCase()));
+                            const bImportant = importantKeys.some(k => k2.toLowerCase().includes(k.toLowerCase()));
+                            if (aImportant && !bImportant) return -1;
+                            if (!aImportant && bImportant) return 1;
+                            return 0;
+                          });
+                          return sortedEntries.map(([key, value], idx) => (
+                            <div key={idx} className="rounded-lg border bg-background/80 p-3 shadow-card flex flex-col gap-1">
+                              <div className="flex items-center gap-2">
+                                <span className="inline-block w-2 h-2 rounded-full bg-primary/60"></span>
+                                <span className="font-medium text-primary">{typeof getDetectedFieldLabel === 'function' ? getDetectedFieldLabel(key) : key}</span>
+                              </div>
+                              <div className={"text-base " + (value ? "text-foreground" : "italic text-muted-foreground")}>{typeof value === 'string' ? value : "Không có dữ liệu"}</div>
+                            </div>
+                          ));
+                        })()}
+                      </div>
+                    ) : (
+                      <div className="italic text-muted-foreground">Không có trường thông tin nào được trích xuất.</div>
+                    )
                   )
                 )}
               </div>
