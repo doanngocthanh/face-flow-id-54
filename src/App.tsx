@@ -7,7 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Home from "./pages/Home";
 import Register from "./pages/Register";
-import Verify from "./pages/Verify";
+import Verify from "./pages/VerifyNew";
 import CameraCapture from "./pages/CameraCapture";
 import NotFound from "./pages/NotFound";
 import UploadPage from "./pages/UploadPage";
