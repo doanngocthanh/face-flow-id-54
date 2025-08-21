@@ -7,7 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { CameraUpload } from "@/components/ui/camera-upload";
 import { useToast } from "@/hooks/use-toast";
-import { UserPlus, Loader2, Shield } from "lucide-react";
+import { ThemeSwitcher } from "@/components/ui/theme-switcher";
+import { UserPlus, Loader2, Shield, ArrowLeft } from "lucide-react";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -64,14 +65,32 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-background to-background/50">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-background to-background/50 relative">
+      {/* Theme Toggle */}
+      <div className="absolute top-4 right-4 z-50">
+        <ThemeSwitcher />
+      </div>
+
       <Card ref={cardRef} className="w-full max-w-md gradient-card shadow-card border-border/50">
         <CardHeader className="text-center space-y-4">
-          <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
-            <Shield className="w-8 h-8 text-primary" />
+          <div className="flex flex-col items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate('/verify')}
+              className="flex items-center gap-2 text-muted-foreground hover:text-foreground self-start"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>Xác thực</span>
+            </Button>
+            <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
+              <Shield className="w-8 h-8 text-primary" />
+            </div>
           </div>
           <div ref={titleRef}>
-            <CardTitle className="text-2xl font-bold text-foreground">Đăng ký eKYC</CardTitle>
+            <CardTitle className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+              Đăng ký khuôn mặt
+            </CardTitle>
             <CardDescription className="text-muted-foreground">
               Xác thực danh tính bằng khuôn mặt
             </CardDescription>
@@ -117,9 +136,9 @@ const Register = () => {
             <Button
               variant="ghost"
               onClick={() => navigate('/verify')}
-              className="text-primary hover:text-primary/80 text-sm"
+              className="text-primary hover:text-primary/80 text-sm transition-colors"
             >
-              Đã có tài khoản? Xác thực →
+              Đã có tài khoản? Xác thực ngay →
             </Button>
           </div>
         </CardContent>

@@ -401,9 +401,16 @@ const CameraCapture = () => {
           repeat: 1
         });
       }
-      // Simulate AI analysis stages
+      // Simulate AI analysis stages with realistic timings
       setAiAnalysisStage('processing');
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise(resolve => setTimeout(resolve, 1800));
+      
+      // Update image quality metrics during processing
+      setImageQuality({
+        brightness: 0.8 + Math.random() * 0.2,
+        sharpness: 0.75 + Math.random() * 0.25, 
+        contrast: 0.7 + Math.random() * 0.3
+      });
       
       // Kiểm tra gương mặt trước khi đăng ký
       setPendingImage(imageData);

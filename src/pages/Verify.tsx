@@ -5,6 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { CameraUpload } from "@/components/ui/camera-upload";
 import { useToast } from "@/hooks/use-toast";
+import { ThemeSwitcher } from "@/components/ui/theme-switcher";
+import { FaceAnalysisOverlay } from "@/components/ui/face-analysis-overlay";
+import { AIHudOverlay } from "@/components/ui/ai-hud-overlay";
 import { Shield, Loader2, CheckCircle, XCircle, ArrowLeft } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
@@ -25,6 +28,13 @@ const Verify = () => {
       detection_confidence?: number;
     };
   } | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [aiAnalysisStage, setAiAnalysisStage] = useState<'detecting' | 'analyzing' | 'processing' | 'complete'>('detecting');
+  const [imageQuality, setImageQuality] = useState({
+    brightness: 0.75,
+    sharpness: 0.82,
+    contrast: 0.68
+  });
 
   const cardRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
@@ -63,6 +73,8 @@ const Verify = () => {
 
     setIsLoading(true);
     setVerificationResult(null);
+    setIsAnalyzing(true);
+    setAiAnalysisStage('analyzing');
 
     try {
       // First check image quality
@@ -88,6 +100,10 @@ const Verify = () => {
       if (!qualityResponse.ok || !qualityResult.is_good) {
         throw new Error(qualityResult.message || 'Ảnh không đạt chất lượng yêu cầu');
       }
+
+      // Simulate AI processing stages
+      setAiAnalysisStage('processing');
+      await new Promise(resolve => setTimeout(resolve, 1500));
 
       // Then authenticate
       console.log('Authenticating...');
@@ -198,6 +214,8 @@ const Verify = () => {
       });
     } finally {
       setIsLoading(false);
+      setIsAnalyzing(false);
+      setAiAnalysisStage('complete');
     }
   };
 
@@ -242,26 +260,33 @@ const Verify = () => {
   }, [verificationResult, faceImage]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-background to-background/50">
-      <Card ref={cardRef} className="w-full max-w-md gradient-card shadow-card border-border/50">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-background to-background/50 relative">
+      {/* Theme Toggle */}
+      <div className="absolute top-4 right-4 z-50">
+        <ThemeSwitcher />
+      </div>
+
+      <Card ref={cardRef} className="w-full max-w-md gradient-card shadow-card border-border/50 relative">
         {!verificationResult?.success && (
           <CardHeader className="text-center space-y-4">
             <div className="flex flex-col items-center gap-2">
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => navigate('/')}
-                className="flex items-center gap-2 text-muted-foreground hover:text-foreground justify-center"
+                onClick={() => navigate('/register')}
+                className="flex items-center gap-2 text-muted-foreground hover:text-foreground self-start"
               >
                 <ArrowLeft className="w-4 h-4" />
-                <span>Quay lại</span>
+                <span>Đăng ký</span>
               </Button>
               <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
                 <Shield className="w-8 h-8 text-primary" />
               </div>
             </div>
             <div ref={titleRef}>
-              <CardTitle className="text-2xl font-bold text-foreground">Xác thực khuôn mặt</CardTitle>
+              <CardTitle className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+                Xác thực khuôn mặt
+              </CardTitle>
               <CardDescription className="text-muted-foreground">
                 Chụp ảnh để xác thực danh tính
               </CardDescription>
@@ -271,13 +296,56 @@ const Verify = () => {
 
         <CardContent className="space-y-6">
           {!verificationResult && (
-            <div ref={formRef}>
+            <div ref={formRef} className="relative">
               <div className="space-y-4">
-                <CameraUpload
-                  onImageCapture={setFaceImage}
-                  disabled={isLoading}
-                  facingMode="user"
-                />
+                <div className="relative">
+                  <CameraUpload
+                    onImageCapture={setFaceImage}
+                    disabled={isLoading}
+                    facingMode="user"
+                  />
+                  
+                  {/* AI Analysis Overlay */}
+                  {faceImage && isAnalyzing && (
+                    <>
+                      <FaceAnalysisOverlay
+                        isAnalyzing={isAnalyzing}
+                        imageDimensions={{ width: 400, height: 300 }}
+                        stage={aiAnalysisStage}
+                        quality={imageQuality}
+                        showMesh={true}
+                        showHUD={true}
+                        className="absolute inset-0 rounded-lg"
+                      />
+                      <AIHudOverlay
+                        isActive={isAnalyzing}
+                        stage={aiAnalysisStage}
+                        quality={imageQuality}
+                        className="absolute inset-0"
+                      />
+                    </>
+                  )}
+                </div>
+
+                {/* AI Status Display */}
+                {isAnalyzing && (
+                  <div className="text-center space-y-2">
+                    <div className="text-sm text-primary font-medium">
+                      {aiAnalysisStage === 'analyzing' && "🧠 Đang phân tích khuôn mặt..."}
+                      {aiAnalysisStage === 'processing' && "⚡ Đang xử lý dữ liệu AI..."}
+                      {aiAnalysisStage === 'complete' && "✅ Phân tích hoàn tất"}
+                    </div>
+                    <div className="h-1 bg-muted rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-gradient-primary transition-all duration-500"
+                        style={{ 
+                          width: aiAnalysisStage === 'analyzing' ? '33%' : 
+                                 aiAnalysisStage === 'processing' ? '66%' : '100%' 
+                        }}
+                      />
+                    </div>
+                  </div>
+                )}
 
                 <Button
                   onClick={handleVerify}
@@ -369,9 +437,9 @@ const Verify = () => {
             <Button
               variant="ghost"
               onClick={() => navigate('/register')}
-              className="text-primary hover:text-primary/80 text-sm"
+              className="text-primary hover:text-primary/80 text-sm transition-colors"
             >
-              Chưa có tài khoản? Đăng ký →
+              Chưa có tài khoản? Đăng ký ngay →
             </Button>
           </div>
         </CardContent>
