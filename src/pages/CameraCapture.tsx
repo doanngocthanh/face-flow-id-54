@@ -12,6 +12,8 @@ import {
   RotateCcw,
   User
 } from "lucide-react";
+import { FaceAnalysisOverlay } from "@/components/ui/face-analysis-overlay";
+import { AIHudOverlay } from "@/components/ui/ai-hud-overlay";
 
 const CameraCapture = () => {
   const [fallbackMode, setFallbackMode] = useState(false);
@@ -32,6 +34,12 @@ const CameraCapture = () => {
   const [showConfirm, setShowConfirm] = useState(false);
   const [existingUser, setExistingUser] = useState<any>(null);
   const [pendingImage, setPendingImage] = useState<string | null>(null);
+  const [aiAnalysisStage, setAiAnalysisStage] = useState<'detecting' | 'analyzing' | 'processing' | 'complete'>('detecting');
+  const [imageQuality, setImageQuality] = useState({
+    brightness: 0.75,
+    sharpness: 0.82,
+    contrast: 0.68
+  });
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -359,6 +367,8 @@ const CameraCapture = () => {
   const capturePhoto = async () => {
     if (!videoRef.current || !canvasRef.current || isProcessing || !currentStream) return;
     setIsProcessing(true);
+    setAiAnalysisStage('analyzing');
+    
     try {
       const canvas = canvasRef.current;
       const video = videoRef.current;
@@ -391,6 +401,10 @@ const CameraCapture = () => {
           repeat: 1
         });
       }
+      // Simulate AI analysis stages
+      setAiAnalysisStage('processing');
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
       // Kiểm tra gương mặt trước khi đăng ký
       setPendingImage(imageData);
       const base64Image = imageData.replace(/^data:image\/[a-z]+;base64,/, '');
@@ -419,6 +433,7 @@ const CameraCapture = () => {
       });
     } finally {
       setIsProcessing(false);
+      setAiAnalysisStage('complete');
     }
   };
 
@@ -765,61 +780,97 @@ const CameraCapture = () => {
           </div>
         )}
         
-        {/* Face detection overlay */}
-        {!isLoading && (
-          <>
-            {/* Face frame */}
-            <div className="relative">
-              <div className={`w-64 h-80 border-4 rounded-3xl transition-colors duration-300 ${
-                faceDetected ? 'border-success shadow-glow' : 'border-white/50'
-              }`}>
-                {/* Corner decorations */}
-                <div className="absolute -top-2 -left-2 w-8 h-8 border-l-4 border-t-4 border-primary rounded-tl-2xl"></div>
-                <div className="absolute -top-2 -right-2 w-8 h-8 border-r-4 border-t-4 border-primary rounded-tr-2xl"></div>
-                <div className="absolute -bottom-2 -left-2 w-8 h-8 border-l-4 border-b-4 border-primary rounded-bl-2xl"></div>
-                <div className="absolute -bottom-2 -right-2 w-8 h-8 border-r-4 border-b-4 border-primary rounded-br-2xl"></div>
-              </div>
-            </div>
-            
-            {/* Top info */}
-            <div className="absolute top-8 left-1/2 transform -translate-x-1/2 text-center text-white">
-              <h1 className="text-2xl font-bold mb-2">Đăng ký khuôn mặt</h1>
-              <p className="text-white/80">Chào {userName}! Hãy đưa mặt vào khung để đăng ký</p>
-            </div>
-            
-            {/* Progress */}
-            <div className="absolute bottom-32 left-1/2 transform -translate-x-1/2 text-center text-white">
-              <div className="flex space-x-2 mb-2">
-                {/* Chỉ chụp 1 lần, ẩn hướng dẫn số lượng ảnh */}
-              </div>
-              <p className="text-sm text-white/80">
-                Tự động chụp khi phát hiện mặt
-              </p>
-            </div>
-            
-            {/* Controls */}
-            <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-4">
-              <Button
-                size="lg"
-                onClick={capturePhoto}
-                disabled={!faceDetected || isProcessing}
-                className="gradient-primary shadow-glow"
-              >
-                <Camera className="w-5 h-5 mr-2" />
-                Chụp thủ công
-              </Button>
-              
-              <Button
-                variant="secondary"
-                size="lg"
-                onClick={() => setFallbackMode(true)}
-                className="bg-white/20 hover:bg-white/30 text-white border-white/30"
-              >
-                Chọn ảnh
-              </Button>
-            </div>
-          </>
-        )}
+            {/* Face detection overlay */}
+            {!isLoading && (
+              <>
+                {/* Face frame */}
+                <div className="relative">
+                  <div className={`w-64 h-80 border-4 rounded-3xl transition-colors duration-300 ${
+                    faceDetected ? 'border-success shadow-glow' : 'border-white/50'
+                  }`}>
+                    {/* Corner decorations */}
+                    <div className="absolute -top-2 -left-2 w-8 h-8 border-l-4 border-t-4 border-primary rounded-tl-2xl"></div>
+                    <div className="absolute -top-2 -right-2 w-8 h-8 border-r-4 border-t-4 border-primary rounded-tr-2xl"></div>
+                    <div className="absolute -bottom-2 -left-2 w-8 h-8 border-l-4 border-b-4 border-primary rounded-bl-2xl"></div>
+                    <div className="absolute -bottom-2 -right-2 w-8 h-8 border-r-4 border-b-4 border-primary rounded-br-2xl"></div>
+                  </div>
+                </div>
+                
+                {/* Advanced AI Analysis Overlays */}
+                {(isProcessing || faceDetected) && (
+                  <>
+                    {/* Face Analysis Overlay with Neural Network */}
+                    <FaceAnalysisOverlay
+                      isAnalyzing={isProcessing || faceDetected}
+                      imageDimensions={{ width: 320, height: 400 }}
+                      stage={aiAnalysisStage}
+                      quality={imageQuality}
+                      showMesh={isProcessing}
+                      showHUD={isProcessing}
+                      className="w-64 h-80 rounded-3xl overflow-hidden"
+                    />
+                    
+                    {/* AI HUD Overlay */}
+                    {isProcessing && (
+                      <AIHudOverlay
+                        isActive={isProcessing}
+                        stage={aiAnalysisStage}
+                        quality={imageQuality}
+                        faceData={{
+                          confidence: 0.92,
+                          landmarks: 68,
+                          emotions: ['neutral', 'focused']
+                        }}
+                        className="w-64 h-80"
+                      />
+                    )}
+                  </>
+                )}
+                
+                {/* Top info */}
+                <div className="absolute top-8 left-1/2 transform -translate-x-1/2 text-center text-white">
+                  <h1 className="text-2xl font-bold mb-2">Đăng ký khuôn mặt</h1>
+                  <p className="text-white/80">Chào {userName}! Hãy đưa mặt vào khung để đăng ký</p>
+                </div>
+                
+                {/* Progress */}
+                <div className="absolute bottom-32 left-1/2 transform -translate-x-1/2 text-center text-white">
+                  <div className="flex space-x-2 mb-2">
+                    {/* Chỉ chụp 1 lần, ẩn hướng dẫn số lượng ảnh */}
+                  </div>
+                  <p className="text-sm text-white/80">
+                    {isProcessing ? "AI đang phân tích khuôn mặt..." : "Tự động chụp khi phát hiện mặt"}
+                  </p>
+                </div>
+                
+                {/* Controls */}
+                <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-4">
+                  <Button
+                    size="lg"
+                    onClick={capturePhoto}
+                    disabled={!faceDetected || isProcessing}
+                    className="gradient-primary shadow-glow"
+                  >
+                    {isProcessing ? (
+                      <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                    ) : (
+                      <Camera className="w-5 h-5 mr-2" />
+                    )}
+                    {isProcessing ? "Đang phân tích..." : "Chụp thủ công"}
+                  </Button>
+                  
+                  <Button
+                    variant="secondary"
+                    size="lg"
+                    onClick={() => setFallbackMode(true)}
+                    className="bg-white/20 hover:bg-white/30 text-white border-white/30"
+                    disabled={isProcessing}
+                  >
+                    Chọn ảnh
+                  </Button>
+                </div>
+              </>
+            )}
       </div>
 
       {/* Popup xác nhận nếu đã có user */}
