@@ -25,6 +25,7 @@ export const CameraUpload = React.forwardRef<
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const videoRef = React.useRef<HTMLVideoElement>(null);
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
+  const isFrontCamera = facingMode === "user";
 
   const startCamera = async () => {
     try {
@@ -36,6 +37,7 @@ export const CameraUpload = React.forwardRef<
         throw new Error("Camera API not supported in this browser");
       }
 
+  // const isFrontCamera = facingMode === "user";
       // First check if any video input devices are available
       const devices = await navigator.mediaDevices.enumerateDevices();
       const videoDevices = devices.filter(device => device.kind === 'videoinput');
@@ -171,14 +173,22 @@ export const CameraUpload = React.forwardRef<
       }
 
       // Crop đúng vùng hiển thị, upscale canvas lên 2x để tăng pixel density
-  const upscale = 3;
+      const upscale = 3;
       canvas.width = sw * upscale;
       canvas.height = sh * upscale;
       const ctx = canvas.getContext('2d');
       if (ctx) {
-  ctx.drawImage(video, sx, sy, sw, sh, 0, 0, sw * upscale, sh * upscale);
-  const imageData = canvas.toDataURL('image/jpeg', 1.0); // JPEG chất lượng cao, pixel density rất cao
-  console.log("Photo captured successfully (cropped & upscaled JPEG x3)");
+        if (isFrontCamera) {
+          ctx.save();
+          ctx.translate(canvas.width, 0);
+          ctx.scale(-1, 1);
+          ctx.drawImage(video, sx, sy, sw, sh, 0, 0, sw * upscale, sh * upscale);
+          ctx.restore();
+        } else {
+          ctx.drawImage(video, sx, sy, sw, sh, 0, 0, sw * upscale, sh * upscale);
+        }
+        const imageData = canvas.toDataURL('image/jpeg', 1.0); // JPEG chất lượng cao, pixel density rất cao
+        console.log("Photo captured successfully (cropped & upscaled JPEG x3)");
         setPreviewImage(imageData);
         onImageCapture(imageData);
         stopCamera();
