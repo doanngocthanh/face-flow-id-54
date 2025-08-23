@@ -272,7 +272,10 @@ export const CameraUpload = React.forwardRef<
             ref={videoRef}
             autoPlay
             playsInline
-            className="w-full h-64 object-cover transform -scale-x-100 rounded-xl"
+            className={cn(
+              "w-full h-64 object-cover rounded-xl",
+              isFrontCamera && "transform -scale-x-100"
+            )}
           />
           <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-3">
             <Button
