@@ -312,9 +312,6 @@ export const CameraUpload = React.forwardRef<
               Camera
             </Button>
           </div>
-          <p className="text-sm text-muted-foreground font-medium">
-            Chỉ chụp ảnh khuôn mặt trực tiếp từ camera
-          </p>
         </div>
       )}
     </div>
