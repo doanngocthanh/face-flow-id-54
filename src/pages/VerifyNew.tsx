@@ -232,7 +232,6 @@ export default function VerifyNew() {
                       height: verificationResult.face_detection.bbox.height
                     } : undefined
                   }
-                  quality={verificationResult?.quality}
                 />
               )}
             </div>

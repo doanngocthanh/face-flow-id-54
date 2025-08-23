@@ -312,15 +312,11 @@ const Verify = () => {
                         isAnalyzing={isAnalyzing}
                         imageDimensions={{ width: 400, height: 300 }}
                         stage={aiAnalysisStage}
-                        quality={imageQuality}
-                        showMesh={true}
-                        showHUD={true}
                         className="absolute inset-0 rounded-lg"
                       />
                       <AIHudOverlay
                         isActive={isAnalyzing}
                         stage={aiAnalysisStage}
-                        quality={imageQuality}
                         className="absolute inset-0"
                       />
                     </>

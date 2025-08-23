@@ -811,9 +811,6 @@ const CameraCapture = () => {
                       isAnalyzing={isProcessing || faceDetected}
                       imageDimensions={{ width: 320, height: 400 }}
                       stage={aiAnalysisStage}
-                      quality={imageQuality}
-                      showMesh={isProcessing}
-                      showHUD={isProcessing}
                       className="w-64 h-80 rounded-3xl overflow-hidden"
                     />
                     
@@ -822,12 +819,6 @@ const CameraCapture = () => {
                       <AIHudOverlay
                         isActive={isProcessing}
                         stage={aiAnalysisStage}
-                        quality={imageQuality}
-                        faceData={{
-                          confidence: 0.92,
-                          landmarks: 68,
-                          emotions: ['neutral', 'focused']
-                        }}
                         className="w-64 h-80"
                       />
                     )}
