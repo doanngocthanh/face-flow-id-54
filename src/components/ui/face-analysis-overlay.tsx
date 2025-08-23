@@ -45,15 +45,25 @@ export function FaceAnalysisOverlay({
         canvas.height = imageDimensions.height;
       }
 
+      ctx.save();
+      ctx.translate(canvas.width, 0);
+      ctx.scale(-1, 1);
+
       // Simple radar sweep
       const centerX = canvas.width / 2;
       const centerY = canvas.height / 2;
       const angle = (time * 2) % (Math.PI * 2);
       
       const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, canvas.width * 0.6);
-      gradient.addColorStop(0, 'hsla(var(--primary), 0.3)');
-      gradient.addColorStop(0.8, 'hsla(var(--primary), 0.1)');
-      gradient.addColorStop(1, 'transparent');
+  // Resolve CSS variable --primary to a real color string
+  const root = getComputedStyle(document.documentElement);
+  const primary = root.getPropertyValue('--primary').trim(); // e.g. "140 81% 31%"
+  // Use modern hsla syntax with slash for alpha if supported, fallback to comma
+  const color03 = `hsla(${primary} / 0.3)`;
+  const color01 = `hsla(${primary} / 0.1)`;
+  gradient.addColorStop(0, color03);
+  gradient.addColorStop(0.8, color01);
+  gradient.addColorStop(1, 'transparent');
       
       ctx.fillStyle = gradient;
       ctx.beginPath();
@@ -61,6 +71,7 @@ export function FaceAnalysisOverlay({
       ctx.arc(centerX, centerY, canvas.width * 0.6, angle - 0.2, angle + 0.2);
       ctx.closePath();
       ctx.fill();
+      ctx.restore();
 
       time += 0.02;
       rafRef.current = requestAnimationFrame(animate);
@@ -91,7 +102,7 @@ export function FaceAnalysisOverlay({
 
 
   return (
-    <div className={cn("absolute inset-0 pointer-events-none", className)}>
+  <div className={cn("absolute inset-0 pointer-events-none", className)}>
       {/* Simple radar sweep */}
       <canvas
         ref={canvasRef}

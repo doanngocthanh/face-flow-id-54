@@ -701,21 +701,7 @@ const CameraCapture = () => {
             </p>
           </div>
           <div className="space-y-4">
-            <input
-              type="file"
-              accept="image/*"
-              capture="user"
-              onChange={handleFileUpload}
-              className="hidden"
-              id="photo-upload"
-            />
-            <label 
-              htmlFor="photo-upload"
-              className="inline-flex items-center justify-center px-6 py-3 bg-primary text-primary-foreground rounded-lg cursor-pointer hover:bg-primary/90 transition-colors"
-            >
-              <Camera className="w-4 h-4 mr-2" />
-              Chọn ảnh từ thiết bị
-            </label>
+
             
             {uploadedImage && (
               <div className="space-y-4">

@@ -232,24 +232,15 @@ export const CameraUpload = React.forwardRef<
   };
 
   return (
-    <div ref={ref} className={cn("relative", className)} {...props}>
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*"
-        className="hidden"
-        onChange={handleFileUpload}
-        disabled={disabled}
-      />
-      
+    <div ref={ref} className={cn("w-full flex flex-col items-center justify-center", className)} {...props}>
       <canvas ref={canvasRef} className="hidden" />
 
       {previewImage ? (
-        <div className="relative rounded-xl overflow-hidden shadow-card">
+        <div className="relative rounded-xl overflow-hidden shadow-card w-full max-w-xs mx-auto">
           <img
             src={previewImage}
             alt="Captured face"
-            className="w-full h-64 object-cover"
+            className="w-full h-64 object-cover rounded-xl"
           />
           <div className="absolute top-2 right-2 flex gap-2">
             <Button
@@ -266,14 +257,14 @@ export const CameraUpload = React.forwardRef<
           </div>
         </div>
       ) : isCapturing ? (
-        <div className="relative rounded-xl overflow-hidden shadow-card">
+        <div className="relative rounded-xl overflow-hidden shadow-card w-full max-w-xs mx-auto">
           <video
             ref={videoRef}
             autoPlay
             playsInline
-            className="w-full h-64 object-cover"
+            className="w-full h-64 object-cover transform -scale-x-100 rounded-xl"
           />
-          <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-3">
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-3">
             <Button
               variant="secondary"
               size="sm"
@@ -293,29 +284,23 @@ export const CameraUpload = React.forwardRef<
           </div>
         </div>
       ) : (
-        <div className="border-2 border-dashed border-border rounded-xl p-8 text-center space-y-4 gradient-card">
-          <div className="flex justify-center space-x-4">
+        <div className="border border-border rounded-2xl p-6 text-center bg-white/80 shadow-md w-full max-w-xs mx-auto flex flex-col items-center space-y-4">
+          <div className="flex flex-col items-center gap-2">
+            <span className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 mb-2">
+              <Camera className="w-6 h-6 text-primary" />
+            </span>
             <Button
               variant="outline"
               onClick={startCamera}
               disabled={disabled}
-              className="flex-1"
+              className="w-40 h-12 rounded-full font-semibold text-base flex items-center justify-center gap-2 shadow-sm border border-primary"
             >
-              <Camera className="h-4 w-4 mr-2" />
+              <Camera className="h-5 w-5 mr-2" />
               Camera
             </Button>
-            <Button
-              variant="outline"
-              onClick={() => fileInputRef.current?.click()}
-              disabled={disabled}
-              className="flex-1"
-            >
-              <Upload className="h-4 w-4 mr-2" />
-              Upload
-            </Button>
           </div>
-          <p className="text-sm text-muted-foreground">
-            Chụp ảnh hoặc tải lên ảnh khuôn mặt
+          <p className="text-sm text-muted-foreground font-medium">
+            Chỉ chụp ảnh khuôn mặt trực tiếp từ camera
           </p>
         </div>
       )}
